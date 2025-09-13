@@ -28,7 +28,7 @@ type Person = {
 // Le nazionalità accettate sono: American, British, Australian, Israeli-American, South African, French, Indian, Israeli, Spanish, South Korean, Chinese.
 
 type Actress = Person & {
-  most_famous_movie: [string, string, string]
+  most_famous_movies: [string, string, string]
   awards: string,
   nationality: "American" | "British" | "Australian" | "Israeli-American" | "South African" | "French" | "Indian" | "Israeli" | "Spanish" | "South Korean" | "Chinese",
 }
@@ -106,3 +106,74 @@ async function getActress(id: number): Promise<Actress | null> {
 }
 
 const attrice = getActress(1).then(data => console.log(data))
+
+
+// 📌 Milestone 4
+// Crea una funzione getAllActresses che chiama:
+
+// GET /actresses
+// La funzione deve restituire un array di oggetti Actress.
+
+// Può essere anche un array vuoto.
+
+type Actresses = Actress[]
+
+function isActressesArray (dati: unknown): dati is Actresses{
+  if(Array.isArray(dati) && 
+    dati.every(isActress)
+  ){
+    return true
+  }
+  return false
+}
+
+async function getAllActresses(): Promise<Actresses | null> {
+
+  try{
+    const response = await fetch(apiUrl)
+
+    if(!response.ok){
+      throw new Error(`Errore HTML ${response.status}: ${response.statusText}`)
+    }
+    const data: unknown = await response.json()
+    if(isActressesArray(data)){
+      return data
+    }
+    throw new Error("Formato dei dati sbagliato")
+  }
+  catch(error){
+    if(error instanceof Error){
+      console.error("Errore nel recupero dei dati", error.message)
+    }
+
+    return null
+  }
+}
+
+getAllActresses().then((data) => console.log(data))
+
+
+// 📌 Milestone 5
+// Crea una funzione getActresses che riceve un array di numeri (gli id delle attrici).
+// Per ogni id nell’array, usa la funzione getActress che hai creato nella Milestone 3 per recuperare l’attrice corrispondente.
+// L'obiettivo è ottenere una lista di risultati in parallelo, quindi dovrai usare Promise.all.
+// La funzione deve restituire un array contenente elementi di tipo Actress oppure null (se l’attrice non è stata trovata).
+
+async function getActresses(array : number[]): Promise <(Actress | null)[]> {
+  const promises : Promise<Actress | null>[] = array.map((num) => getActress(num))
+
+  try{
+    const result = await Promise.all(promises)
+      return result
+  }
+  catch(error){
+    if(error instanceof Error){
+      console.error("Errore nel recupero dei dati", error.message)
+    }
+    return []
+  }
+}
+
+getActresses([1,2,3]).then((data) => console.log(data))
+
+
