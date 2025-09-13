@@ -177,3 +177,103 @@ async function getActresses(array : number[]): Promise <(Actress | null)[]> {
 getActresses([1,2,3]).then((data) => console.log(data))
 
 
+// BONUSES
+
+// 🎯 BONUS 1
+// Crea le funzioni:
+
+// createActress
+// updateActress
+// Utilizza gli Utility Types:
+
+// Omit: per creare un'attrice senza passare id, che verrà generato casualmente.
+// Partial: per permettere l’aggiornamento di qualsiasi proprietà tranne id e name.
+
+type NewActress = Omit<Actress, "id">
+
+async function createActress (newActress : NewActress): Promise<Actress | null>{
+  try{
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "content-Type": "application/json"
+      },
+      body: JSON.stringify(newActress)
+    })
+
+    if(!response.ok){
+      throw new Error (`Errore HTML ${response.status}: ${response.statusText}`)
+    }
+
+    const createActress: Actress = await response.json()
+    return createActress
+  }
+  catch(error){
+    if(error instanceof Error){
+      console.error("Errore nella creazione dell'attrice", error)
+      return null
+    }
+  }
+}
+
+const nuovaAttrice: NewActress = {
+  name: "Nome Attrice",
+  birth_year: 1985,
+  biography: "Breve bio",
+  image: "url-immagine.jpg",
+  most_famous_movies: ["Film1", "Film2", "Film3"],
+  awards: "Premi vinti",
+  nationality: "American"
+};
+
+createActress(nuovaAttrice).then((result) => {
+  if (result) {
+    console.log("Attrice creata:", result);
+  } else {
+    console.log("Creazione fallita");
+  }
+});
+
+type UpdatedActress = Partial<Omit<Actress, "id" | "name">> & Pick<Actress, "id" | "name">
+
+async function updateActress(update : UpdatedActress, id: number) : Promise<Actress | null> { 
+  try{
+    const response = await fetch(`${apiUrl}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(update)
+    })
+
+    if(!response.ok){
+      throw new Error(`Errore HTML ${response.status}: ${response.statusText}`)
+    }
+
+    const updateActress : Actress = await response.json()
+    return updateActress
+
+  }
+  catch(error){
+    if(error instanceof Error){
+      console.error("Errore nell'aggiornamento dell'attrice", error)
+      return null
+    }
+  }
+}
+
+const daAggiornare: UpdatedActress = {
+  id: 1,
+  name: "Emily Blunt",
+  biography: "Biografia aggiornata dell'attrice.",
+  nationality: "British",
+  awards: "Oscar 2020"
+};
+
+updateActress(daAggiornare, 1).then((result) => {
+  if (result) {
+    console.log("Attrice aggiornata con successo:", result);
+  } else {
+    console.log("Aggiornamento fallito.");
+  }
+});
